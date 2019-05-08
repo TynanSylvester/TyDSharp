@@ -1,8 +1,8 @@
 # TyDSharp
 
-A simple C# implementation of TyD - Tynan's Tiny Data Format.
+A simple C# implementation of TyD - Tynan's Tiny Data Language.
 
-[Read the TyD spec here.](https://github.com/tyd-format/TyD)
+[Read the TyD spec here.](https://github.com/tyd-lang/TyD)
 
 ## Version
 
