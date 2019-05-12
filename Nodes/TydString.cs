@@ -23,6 +23,30 @@ namespace Tyd
             }
         }
 
+        public int IntValue
+        {
+            get
+            {
+                return int.Parse(val);
+            }
+        }
+
+        public bool BoolValue
+        {
+            get
+            {
+                return bool.Parse(val);
+            }
+        }
+
+        public float FloatValue
+        {
+            get
+            {
+                return float.Parse(val);
+            }
+        }
+
         public TydString(string name, string val, TydNode parent, int docLine = -1) : base(name, parent, docLine)
         {
             this.val = val;
