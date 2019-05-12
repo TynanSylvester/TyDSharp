@@ -49,6 +49,30 @@ namespace Tyd
                 }
             }
 
+            // Check if table has source
+            if(AttributeSource != null)
+            {
+                TydTable parentTable = Parent as TydTable;
+
+                if (parentTable != null)
+                {
+                    TydTable childTable;
+
+                    // Search for the handle 
+                    foreach(TydNode node in parentTable.Nodes)
+                    {
+                        childTable = node as TydTable;
+
+                        if(childTable != null
+                            && childTable.AttributeHandle == AttributeSource)
+                        {
+                            // Search for the child on the source table
+                            return childTable.FindChild(childName);
+                        }
+                    }
+                }
+            }
+
             return null;
         }
     }
