@@ -35,16 +35,16 @@ namespace Tyd
                     sb.AppendLine();
 
                 if (tab.Count == 0)
-                    sb.Append("[]");
+                    sb.Append("{}");
                 else
                 {
                     //Sub-nodes
-                    sb.AppendLine(IndentString(indent) + "[");
+                    sb.AppendLine(IndentString(indent) + "{");
                     for (int i = 0; i < tab.Count; i++)
                     {
                         sb.AppendLine(Write(tab[i], indent + 1));
                     }
-                    sb.Append(IndentString(indent) + "]");
+                    sb.Append(IndentString(indent) + "}");
                 }
 
                 return sb.ToString();
@@ -61,16 +61,16 @@ namespace Tyd
                     sb.AppendLine();
 
                 if (list.Count == 0)
-                    sb.Append("{}");
+                    sb.Append("[]");
                 else
                 {
                     //Sub-nodes
-                    sb.AppendLine(IndentString(indent) + "{");
+                    sb.AppendLine(IndentString(indent) + "[");
                     for (int i = 0; i < list.Count; i++)
                     {
                         sb.AppendLine(Write(list[i], indent + 1));
                     }
-                    sb.Append(IndentString(indent) + "}");
+                    sb.Append(IndentString(indent) + "]");
                 }
 
                 return sb.ToString();
