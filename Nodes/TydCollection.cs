@@ -3,7 +3,6 @@ using System.Collections.Generic;
 
 namespace Tyd
 {
-
     ///<summary>
     /// A TydNode that contains a collection of sub-nodes.
     ///</summary>
@@ -11,7 +10,6 @@ namespace Tyd
     {
         //Data
         protected List<TydNode> nodes = new List<TydNode>();
-        protected string attClass;
         protected string attHandle;
         protected string attSource;
         protected bool attAbstract;
@@ -19,70 +17,30 @@ namespace Tyd
         //Properties
         public int Count
         {
-            get
-            {
-                return nodes.Count;
-            }
+            get{return nodes.Count;}
         }
 
         public List<TydNode> Nodes
         {
-            get
-            {
-                return nodes;
-            }
-        }
-
-        public string AttributeClass
-        {
-            get
-            {
-                return attClass;
-            }
-
-            set
-            {
-                attClass = value;
-            }
+            get{return nodes;}
         }
 
         public string AttributeHandle
         {
-            get
-            {
-                return attHandle;
-            }
-
-            set
-            {
-                attHandle = value;
-            }
+            get{return attHandle;}
+            set{attHandle = value;}
         }
 
         public string AttributeSource
         {
-            get
-            {
-                return attSource;
-            }
-
-            set
-            {
-                attSource = value;
-            }
+            get{return attSource;}
+            set{attSource = value;}
         }
 
         public bool AttributeAbstract
         {
-            get
-            {
-                return attAbstract;
-            }
-
-            set
-            {
-                attAbstract = value;
-            }
+            get{return attAbstract;}
+            set{attAbstract = value;}
         }
 
         public TydNode this[int index]
@@ -110,9 +68,8 @@ namespace Tyd
         {
         }
 
-        public void SetupAttributes(string attClass, string attHandle, string attSource, bool attAbstract)
+        public void SetupAttributes(string attHandle, string attSource, bool attAbstract)
         {
-            this.attClass = attClass;
             this.attHandle = attHandle;
             this.attSource = attSource;
             this.attAbstract = attAbstract;
@@ -130,7 +87,6 @@ namespace Tyd
         protected void CopyDataFrom(TydCollection other)
         {
             other.docIndexEnd = docIndexEnd;
-            other.attClass = attClass;
             other.attHandle = attHandle;
             other.attSource = attSource;
             other.attAbstract = attAbstract;

@@ -1,11 +1,7 @@
-using System.Collections.Generic;
-
 namespace Tyd
 {
-
     ///<summary>
     /// Contains an ordered collection of anonymous TydNodes.
-    /// Generally used to represent lists of items.
     ///</summary>
     public class TydList : TydCollection
     {

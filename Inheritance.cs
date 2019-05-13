@@ -218,11 +218,6 @@ namespace Tyd
 
                     node.resolved = true;
 
-                    //Write resolved node's class attribute
-                    //Original takes precedence over source; source takes precedence over default
-                    var attClass = node.tydNode.AttributeClass ?? node.source.tydNode.AttributeClass;
-                    node.tydNode.SetupAttributes(attClass, null, null, false);
-
                     //Apply inheritance from source to node
                     ApplyInheritance(node.source.tydNode, node.tydNode);
                 }

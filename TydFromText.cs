@@ -27,7 +27,6 @@ namespace Tyd
             while (true)
             {
                 string recordName = null;
-                string recordAttClass = null;
                 string recordAttHandle = null;
                 string recordAttSource = null;
                 bool recordAttAbstract = false;
@@ -73,7 +72,6 @@ namespace Tyd
                             string attVal = ReadSymbol(doc, ref p);
                             switch (attName)
                             {
-                                case Constants.ClassAttributeName: recordAttClass = attVal; break;
                                 case Constants.HandleAttributeName: recordAttHandle = attVal; break;
                                 case Constants.SourceAttributeName: recordAttSource = attVal; break;
                                 default: throw new Exception("Unknown attribute name '" + attName + "' at " + IndexToLocationString(doc, p));
@@ -124,7 +122,7 @@ namespace Tyd
                         throw new FormatException("Expected ']' at " + IndexToLocationString(doc, p));
 
                     newTable.docIndexEnd = p;
-                    newTable.SetupAttributes(recordAttClass, recordAttHandle, recordAttSource, recordAttAbstract);
+                    newTable.SetupAttributes(recordAttHandle, recordAttSource, recordAttAbstract);
                     yield return newTable;
 
                     //Move pointer one past the closing bracket
@@ -152,7 +150,7 @@ namespace Tyd
                         throw new FormatException("Expected " + Constants.ListEndChar + " at " + IndexToLocationString(doc, p));
 
                     newList.docIndexEnd = p;
-                    newList.SetupAttributes(recordAttClass, recordAttHandle, recordAttSource, recordAttAbstract);
+                    newList.SetupAttributes(recordAttHandle, recordAttSource, recordAttAbstract);
                     yield return newList;
 
                     //Move pointer one past the closing bracket
@@ -222,12 +220,10 @@ namespace Tyd
                     q--;
                 val = doc.Substring(pStart, q - pStart + 1);
 
-                //Special case for 'null' naked string.
-                if (val == "null")
+                if (val == "null") //Special case for 'null' naked string.
                     val = null;
-
-                //Resolve escaped characters
-                val = ResolveEscapeChars(val);
+                else
+                    val = ResolveEscapeChars(val);
 
                 //Special case for ';': We want to be pointing after it, not on it.
                 if (p < doc.Length && doc[p] == ';')

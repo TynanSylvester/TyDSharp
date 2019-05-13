@@ -4,6 +4,10 @@ using System.Xml;
 namespace Tyd
 {
 
+///<summary>
+/// Utility methods for converting from XML to TyD.
+/// To load XML this way, it must be formatted a specific way.
+///</summary>
 public static class TydXml
 {
     ///<summary>
@@ -43,7 +47,6 @@ public static class TydXml
             : null;
 
         //Record attributes here so we can use them later
-        string attClass = null;
         string attHandle = null;
         string attSource = null;
         bool attAbstract = false;
@@ -52,11 +55,9 @@ public static class TydXml
         {
             foreach( XmlAttribute a in xmlAttributes )
             {
-                if( a.Name == "Class" )
-                    attClass = a.Value;
-                else if( a.Name == "Name" )
+                if( a.Name == "Handle" )
                     attHandle = a.Value;
-                else if( a.Name == "ParentName" )
+                else if( a.Name == "Source" )
                     attSource = a.Value;
                 else if( a.Name == "Abstract" && a.Value == "True" )
                     attAbstract = true;
@@ -74,7 +75,7 @@ public static class TydXml
             //It's a list
 
             TydList tydRoot = new TydList(newTydName, tydParent);
-            tydRoot.SetupAttributes(attClass, attHandle, attSource, attAbstract);
+            tydRoot.SetupAttributes(attHandle, attSource, attAbstract);
             foreach( XmlNode xmlChild in xmlRoot.ChildNodes )
             {
                 tydRoot.AddChild( TydNodeFromXmlNode(xmlChild, tydRoot) );
@@ -88,7 +89,7 @@ public static class TydXml
 
             //It's a table
             TydTable tydRoot = new TydTable(newTydName, tydParent);
-            tydRoot.SetupAttributes(attClass, attHandle, attSource, attAbstract);
+            tydRoot.SetupAttributes(attHandle, attSource, attAbstract);
             foreach( XmlNode xmlChild in xmlRoot.ChildNodes )
             {
                 tydRoot.AddChild( TydNodeFromXmlNode(xmlChild, tydRoot) );

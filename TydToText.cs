@@ -145,12 +145,6 @@ namespace Tyd
                 appendedSomething = true;
             }
 
-            if (node.AttributeClass != null)
-            {
-                AppendWithWhitespace(Constants.AttributeStartChar + Constants.ClassAttributeName + " " + node.AttributeClass, sb, indent, appendedSomething);
-                appendedSomething = true;
-            }
-
             if (node.AttributeAbstract)
             {
                 AppendWithWhitespace(Constants.AttributeStartChar + Constants.AbstractAttributeName, sb, indent, appendedSomething);

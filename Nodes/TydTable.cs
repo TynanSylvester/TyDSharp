@@ -1,9 +1,7 @@
 namespace Tyd
 {
-
     ///<summary>
     /// Contains an ordered collection of named TydNodes.
-    /// Generally used to represent a data collection like a config file or savegame, or an object with characteristics like a terrain type or character.
     ///</summary>
     public class TydTable : TydCollection
     {
