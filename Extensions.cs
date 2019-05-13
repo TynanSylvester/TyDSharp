@@ -1,12 +1,13 @@
 namespace Tyd
 {
 
-public static class Extensions
-{
-    public static bool IsNullValueNode( this TydNode node )
+    public static class Extensions
     {
-        return node is TydString nodeStr && nodeStr.Value == null;
-    }
-}
+        public static bool IsNullValueNode(this TydNode node)
+        {
+            var nodeStr = node as TydString;
 
+            return nodeStr != null && nodeStr.Value == null;
+        }
+    }
 }
