@@ -75,12 +75,15 @@ namespace Tyd
             this.attAbstract = attAbstract;
         }
 
-        ///<summary>
-        /// Add a node as a child of this node, and link it as a parent.
-        ///</summary>
         public void AddChild(TydNode node)
         {
             nodes.Add(node);
+            node.Parent = this;
+        }
+
+        public void InsertChild(TydNode node, int index)
+        {
+            nodes.Insert(index, node);
             node.Parent = this;
         }
 

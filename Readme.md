@@ -6,7 +6,7 @@ A simple C# implementation of TyD - Tynan's Tiny Data Language.
 
 ## Version
 
-TyDSharp is currently in version 0.2.0, supporting TyD version 0.2.0.
+TyDSharp is currently in version 0.2.0, supporting TyD version 0.2.1.
 
 TyDSharp version numbers don't necessarily match TyD version numbers.
 

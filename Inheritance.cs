@@ -240,37 +240,46 @@ namespace Tyd
         {
             try
             {
+                //Source is null; do nothing
+                {
+                    TydString sourceStr = source as TydString;
+                    if (sourceStr != null && sourceStr.Value == null )
+                    {
+                        return;
+                    }
+                }
+
                 //They're strings: Copy source over heir
                 {
                     TydString sourceStr = source as TydString;
                     if (sourceStr != null)
                     {
-                        TydString heirStr = heir as TydString;
-                        heirStr.Value = sourceStr.Value;
+                        ((TydString)heir).Value = sourceStr.Value;
                         return;
                     }
                 }
 
-                //They're tables: Combine all children of source and heir, with source having priority in case of duplicates
+                //They're tables: Combine all children of source and heir. Unique-name source nodes are prepended
                 {
                     TydTable sourceObj = source as TydTable;
                     if (sourceObj != null)
                     {
-                        TydTable heirObj = (TydTable)heir;
+                        TydTable heirTable = (TydTable)heir;
                         for (int i = 0; i < sourceObj.Count; i++)
                         {
                             var sourceChild = sourceObj[i];
-                            var heirMatchingChild = heirObj[sourceChild.Name];
+                            var heirMatchingChild = heirTable[sourceChild.Name];
+
                             if (heirMatchingChild != null)
                                 ApplyInheritance(sourceChild, heirMatchingChild);
                             else
-                                heirObj.AddChild(sourceChild); //Does this need to be DeepClone?
+                                heirTable.InsertChild(sourceChild, 0); //Does this need to be DeepClone?
                         }
                         return;
                     }
                 }
 
-                //They're lists: Append source's entries to heir's entries
+                //They're lists: Prepend source's children before heir's children
                 {
                     TydList sourceList = source as TydList;
                     if (sourceList != null)
@@ -278,7 +287,7 @@ namespace Tyd
                         TydList heirList = (TydList)heir;
                         for (int i = 0; i < sourceList.Count; i++)
                         {
-                            heirList.AddChild(sourceList[i]); //Does this need to be DeepClone?
+                            heirList.InsertChild(sourceList[i], 0); //Does this need to be DeepClone?
                         }
                         return;
                     }
