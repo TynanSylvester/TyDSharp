@@ -103,34 +103,6 @@ namespace Tyd
         }
 
         ///<summary>
-        /// Returns all the objects defined in the file, serialized to type T.
-        ///</summary>
-        public IEnumerable<T> GetObjects<T>() where T : new()
-        {
-            if( docNode == null )
-                throw new Exception("TydFile has no document node: " + FileName);
-
-            foreach (var n in TydHelper.TydToObject.GetObjects<T>(docNode,filePath))
-            {
-                yield return n;
-            }
-        }
-
-        /// <summary>
-        /// Returns the single object defined by the file, deserialized as type T.
-        /// </summary>
-        public T GetObject<T>( bool resolveCrossRefs = false ) where T : new()
-        {
-            if( docNode == null )
-                throw new Exception("TydFile has no document node: " + FileName);
-
-            if( docNode.Count == 0 )
-                throw new Exception("TydFile contains a document node but no data: " + FileName );
-
-            return TydHelper.TydToObject.GetObject<T>(docNode, resolveCrossRefs, filePath );
-        }
-
-        ///<summary>
         /// Write to a file, overwriting any file present.
         /// If a path is provided, the file's path is changed to that new path before saving. Otherwise, the current path is used.
         ///</summary>

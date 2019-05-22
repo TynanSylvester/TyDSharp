@@ -35,16 +35,16 @@ namespace Tyd
                     sb.AppendLine();
 
                 if (tab.Count == 0)
-                    sb.Append("[]");
+                    sb.Append(Constants.TableStartChar.ToString() + Constants.TableEndChar.ToString());
                 else
                 {
                     //Sub-nodes
-                    sb.AppendLine(IndentString(indent) + "[");
+                    sb.AppendLine(IndentString(indent) + Constants.TableStartChar);
                     for (int i = 0; i < tab.Count; i++)
                     {
                         sb.AppendLine(Write(tab[i], indent + 1));
                     }
-                    sb.Append(IndentString(indent) + "]");
+                    sb.Append(IndentString(indent) + Constants.TableEndChar);
                 }
 
                 return sb.ToString();
@@ -61,16 +61,16 @@ namespace Tyd
                     sb.AppendLine();
 
                 if (list.Count == 0)
-                    sb.Append("{}");
+                    sb.Append(Constants.ListStartChar.ToString() + Constants.ListEndChar.ToString());
                 else
                 {
                     //Sub-nodes
-                    sb.AppendLine(IndentString(indent) + "{");
+                    sb.AppendLine(IndentString(indent) + Constants.ListStartChar);
                     for (int i = 0; i < list.Count; i++)
                     {
                         sb.AppendLine(Write(list[i], indent + 1));
                     }
-                    sb.Append(IndentString(indent) + "}");
+                    sb.Append(IndentString(indent) + Constants.ListEndChar);
                 }
 
                 return sb.ToString();
@@ -128,11 +128,11 @@ namespace Tyd
             return false;
         }
 
-        //Returns string content s with escape chars properly escaped according to Tyd rules.
+        //Returns string contents with escape chars properly escaped according to Tyd rules.
         private static string EscapeCharsEscapedForQuotedString(string s)
         {
             return s.Replace("\"", "\\\"")
-                    .Replace("#", "\\#");
+                    .Replace( Constants.CommentChar.ToString(), ("\\" + Constants.CommentChar.ToString()) );
         }
 
         private static bool AppendNodeIntro(TydCollection node, StringBuilder sb, int indent)
