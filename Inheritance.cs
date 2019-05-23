@@ -240,24 +240,9 @@ namespace Tyd
         {
             try
             {
-                //Source is null; do nothing
-                {
-                    TydString sourceStr = source as TydString;
-                    if (sourceStr != null && sourceStr.Value == null )
-                    {
-                        return;
-                    }
-                }
-
-                //They're strings: Copy source over heir
-                {
-                    TydString sourceStr = source as TydString;
-                    if (sourceStr != null)
-                    {
-                        ((TydString)heir).Value = sourceStr.Value;
-                        return;
-                    }
-                }
+                //They're either strings or nulls: We just keep the existing heir's value
+                if (source is TydString)
+                    return;
 
                 //They're tables: Combine all children of source and heir. Unique-name source nodes are prepended
                 {
