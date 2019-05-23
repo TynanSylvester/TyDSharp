@@ -6,9 +6,6 @@ namespace Tyd
 
     public static class TydFromText
     {
-        //Working temp
-        private static List<string> usedNames = new List<string>();
-
         public static IEnumerable<TydNode> Parse(string text)
         {
             return Parse(text, 0, null, true);
@@ -98,26 +95,16 @@ namespace Tyd
 
                     p = NextSubstanceIndex(text, p);
 
-                    //Recursively parse all of new child's children and add them to it
-                    try
+                    //Recursively parse all of new child's children
+                    foreach( var subNode in Parse(text, p, newTable, expectNames: true) )
                     {
-                        foreach (var subNode in Parse(text, p, newTable, expectNames: true))
-                        {
-                            if (usedNames.Contains(subNode.Name))
-                                throw new FormatException("Duplicate record name " + subNode.Name + " at " + IndexToLocationString(text, p));
-                            usedNames.Add(subNode.Name);
-
-                            newTable.AddChild(subNode);
-                            p = subNode.docIndexEnd + 1;
-                        }
-                    }
-                    finally
-                    {
-                        usedNames.Clear();
+                        newTable.AddChild(subNode);
+                        p = subNode.docIndexEnd + 1;
                     }
 
                     p = NextSubstanceIndex(text, p);
 
+                    //Confirm that we are indeed on the closing bracket
                     if (text[p] != Constants.TableEndChar)
                         throw new FormatException("Expected '" + Constants.TableEndChar + "' at " + IndexToLocationString(text, p));
 
