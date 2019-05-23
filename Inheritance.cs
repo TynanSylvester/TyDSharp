@@ -11,10 +11,9 @@ namespace Tyd
     /// To use Inheritance:
     /// 1. Call Initialize().
     /// 2. Register all the nodes you want to interact with each other.
-    /// 3. Call ResolveAll. This will modify the registered nodes in-place with any inheritance data.
-    /// 4. Call Complete().
+    /// 3. Call ResolveAll(). This will modify the registered nodes in-place with any inheritance data, and then resets.
     ///
-    /// It's recommended you use try/catch to ensure that Complete is always called.
+    /// Only use Reset() to recover from errors.
     /// </summary>
     public static class Inheritance
     {
@@ -68,19 +67,6 @@ namespace Tyd
             initialized = true;
         }
 
-        public static void Complete()
-        {
-            //We clear these first because even if it's not initialized, in case of something going really wrong we still want these to end up cleared.
-            nodesResolved.Clear();
-            nodesUnresolved.Clear();
-            nodesByHandle.Clear();
-
-            if (!initialized)
-                throw new Exception("Completed Tyd.Inheritance when it was not initialized. Call Initialize() first.");
-
-            initialized = false;
-        }
-
         ///<summary>
         /// Registers a single node.
         /// When we resolve later, we'll be able to use this node as a source.
@@ -108,10 +94,10 @@ namespace Tyd
         }
 
         ///<summary>
-        /// Registers all nodes from doc.
+        /// Registers all root nodes in a doc.
         /// When we resolve later, we'll be able to use the nodes in this document as a sources.
         ///</summary>
-        public static void RegisterAllFrom(TydDocument doc)
+        public static void RegisterAllRoots(TydDocument doc)
         {
             if (!initialized)
                 throw new Exception("Used Tyd.Inheritance when it was not initialized.");
@@ -119,7 +105,6 @@ namespace Tyd
             for (int i = 0; i < doc.Count; i++)
             {
                 var tydCol = doc[i] as TydCollection;
-
                 if (tydCol != null)
                     Register(tydCol);
             }
@@ -133,8 +118,26 @@ namespace Tyd
             if (!initialized)
                 throw new Exception("Used Tyd.Inheritance when it was not initialized.");
 
-            LinkAllInheritanceNodes();
-            ResolveAllUnresolvedInheritanceNodes();
+            try
+            {
+                LinkAllInheritanceNodes();
+                ResolveAllUnresolvedInheritanceNodes();
+            }
+            finally
+            {
+                Reset();
+            }
+        }
+
+        ///<summary>
+        /// Reset the inheritance system to its initial state. Generally, this should only be used to recover from errors.
+        ///</summary>
+        public static void Reset()
+        {
+            nodesResolved.Clear();
+            nodesUnresolved.Clear();
+            nodesByHandle.Clear();
+            initialized = false;
         }
 
         /// <summary>
