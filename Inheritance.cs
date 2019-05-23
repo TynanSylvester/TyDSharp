@@ -282,7 +282,8 @@ namespace Tyd
                         TydList heirList = (TydList)heir;
                         for (int i = 0; i < sourceList.Count; i++)
                         {
-                            heirList.InsertChild(sourceList[i], 0); //Does this need to be DeepClone?
+                            //Insert at i so the nodes stay in the same order from source to heir
+                            heirList.InsertChild(sourceList[i], i); //Does this need to be DeepClone?
                         }
                         return;
                     }
