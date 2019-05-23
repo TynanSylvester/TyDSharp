@@ -244,6 +244,13 @@ namespace Tyd
                 if (source is TydString)
                     return;
 
+                //Heir has noinherit attribute: Skip this inheritance
+                {
+                    TydCollection heirCol = heir as TydCollection;
+                    if( heirCol != null && heirCol.AttributeNoInherit )
+                        return;
+                }
+
                 //They're tables: Combine all children of source and heir. Unique-name source nodes are prepended
                 {
                     TydTable sourceObj = source as TydTable;

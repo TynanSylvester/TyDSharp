@@ -27,6 +27,7 @@ namespace Tyd
                 string recordAttHandle = null;
                 string recordAttSource = null;
                 bool recordAttAbstract = false;
+                bool recordAttNoInherit = false;
 
                 try
                 {
@@ -60,6 +61,11 @@ namespace Tyd
                         {
                             //Just reading the abstract name indicates it's abstract, no value is needed
                             recordAttAbstract = true;
+                        }
+                        else if( attName == Constants.NoInheritAttributeName )
+                        {
+                            //Just reading the noinherit name indicates it's noinherit, no value is needed
+                            recordAttNoInherit = true;
                         }
                         else
                         {
@@ -109,7 +115,7 @@ namespace Tyd
                         throw new FormatException("Expected '" + Constants.TableEndChar + "' at " + IndexToLocationString(text, p));
 
                     newTable.docIndexEnd = p;
-                    newTable.SetupAttributes(recordAttHandle, recordAttSource, recordAttAbstract);
+                    newTable.SetupAttributes(recordAttHandle, recordAttSource, recordAttAbstract, recordAttNoInherit);
                     yield return newTable;
 
                     //Move pointer one past the closing bracket
@@ -137,7 +143,7 @@ namespace Tyd
                         throw new FormatException("Expected " + Constants.ListEndChar + " at " + IndexToLocationString(text, p));
 
                     newList.docIndexEnd = p;
-                    newList.SetupAttributes(recordAttHandle, recordAttSource, recordAttAbstract);
+                    newList.SetupAttributes(recordAttHandle, recordAttSource, recordAttAbstract, recordAttNoInherit);
                     yield return newList;
 
                     //Move pointer one past the closing bracket

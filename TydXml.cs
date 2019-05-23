@@ -50,6 +50,7 @@ public static class TydXml
         string attHandle = null;
         string attSource = null;
         bool attAbstract = false;
+        bool attNoInherit = false;
         var xmlAttributes = xmlRoot.Attributes;
         if( xmlAttributes != null )
         {
@@ -61,6 +62,8 @@ public static class TydXml
                     attSource = a.Value;
                 else if( a.Name == "Abstract" && a.Value == "True" )
                     attAbstract = true;
+                else if( a.Name == "Inherit" && a.Value == "False" )
+                    attNoInherit = true;
             }
         }
 
@@ -75,7 +78,7 @@ public static class TydXml
             //It's a list
 
             TydList tydRoot = new TydList(newTydName, tydParent);
-            tydRoot.SetupAttributes(attHandle, attSource, attAbstract);
+            tydRoot.SetupAttributes(attHandle, attSource, attAbstract, attNoInherit);
             foreach( XmlNode xmlChild in xmlRoot.ChildNodes )
             {
                 tydRoot.AddChild( TydNodeFromXmlNode(xmlChild, tydRoot) );
@@ -89,7 +92,7 @@ public static class TydXml
 
             //It's a table
             TydTable tydRoot = new TydTable(newTydName, tydParent);
-            tydRoot.SetupAttributes(attHandle, attSource, attAbstract);
+            tydRoot.SetupAttributes(attHandle, attSource, attAbstract, attNoInherit);
             foreach( XmlNode xmlChild in xmlRoot.ChildNodes )
             {
                 tydRoot.AddChild( TydNodeFromXmlNode(xmlChild, tydRoot) );

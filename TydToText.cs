@@ -151,6 +151,12 @@ namespace Tyd
                 appendedSomething = true;
             }
 
+            if (node.AttributeNoInherit)
+            {
+                AppendWithWhitespace(Constants.AttributeStartChar + Constants.NoInheritAttributeName, sb, indent, appendedSomething);
+                appendedSomething = true;
+            }
+
             if (node.AttributeHandle != null)
             {
                 AppendWithWhitespace(Constants.AttributeStartChar + Constants.HandleAttributeName + " " + node.AttributeHandle, sb, indent, appendedSomething);

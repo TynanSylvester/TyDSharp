@@ -13,6 +13,7 @@ namespace Tyd
         protected string attHandle;
         protected string attSource;
         protected bool attAbstract;
+        protected bool attNoInherit;
 
         //Properties
         public int Count
@@ -43,6 +44,12 @@ namespace Tyd
             set{attAbstract = value;}
         }
 
+        public bool AttributeNoInherit
+        {
+            get{return attNoInherit;}
+            set{attNoInherit = value;}
+        }
+
         public TydNode this[int index]
         {
             get
@@ -68,11 +75,12 @@ namespace Tyd
         {
         }
 
-        public void SetupAttributes(string attHandle, string attSource, bool attAbstract)
+        public void SetupAttributes(string attHandle, string attSource, bool attAbstract, bool attNoInherit)
         {
             this.attHandle = attHandle;
             this.attSource = attSource;
             this.attAbstract = attAbstract;
+            this.attNoInherit = attNoInherit;
         }
 
         public void AddChild(TydNode node)
@@ -89,10 +97,11 @@ namespace Tyd
 
         protected void CopyDataFrom(TydCollection other)
         {
-            other.docIndexEnd = docIndexEnd;
-            other.attHandle = attHandle;
-            other.attSource = attSource;
-            other.attAbstract = attAbstract;
+            other.docIndexEnd   = docIndexEnd;
+            other.attHandle     = attHandle;
+            other.attSource     = attSource;
+            other.attAbstract   = attAbstract;
+            other.attNoInherit  = attNoInherit;
             for (int i = 0; i < nodes.Count; i++)
             {
                 other.AddChild(nodes[i].DeepClone());
