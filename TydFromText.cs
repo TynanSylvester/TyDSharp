@@ -77,7 +77,8 @@ namespace Tyd
                             {
                                 case Constants.HandleAttributeName: recordAttHandle = attVal; break;
                                 case Constants.SourceAttributeName: recordAttSource = attVal; break;
-                                default: throw new Exception("Unknown attribute name '" + attName + "' at " + IndexToLocationString(text, p));
+                                default: throw new Exception("Unknown attribute name '" + attName + "' at " + LineColumnString(text, p)
+                                                            + "\n" + ErrorSectionString(text,p));
                             }
                         }
 
@@ -86,7 +87,8 @@ namespace Tyd
                 }
                 catch (Exception e)
                 {
-                    throw new Exception("Exception parsing Tyd headers at " + IndexToLocationString(text, p) + ": " + e.ToString(), e);
+                    throw new Exception("Exception parsing Tyd headers at " + LineColumnString(text, p) + ": " + e.ToString()
+                                        + "\n" + ErrorSectionString(text,p), e);
                 }
 
                 //Read the record value.
@@ -112,7 +114,8 @@ namespace Tyd
 
                     //Confirm that we are indeed on the closing bracket
                     if (text[p] != Constants.TableEndChar)
-                        throw new FormatException("Expected '" + Constants.TableEndChar + "' at " + IndexToLocationString(text, p));
+                        throw new FormatException("Expected '" + Constants.TableEndChar + "' at " + LineColumnString(text, p)
+                                                + "\n" + ErrorSectionString(text,p) );
 
                     newTable.docIndexEnd = p;
                     newTable.SetupAttributes(recordAttHandle, recordAttSource, recordAttAbstract, recordAttNoInherit);
@@ -138,9 +141,11 @@ namespace Tyd
                         p = subNode.docIndexEnd + 1;
                     }
                     p = NextSubstanceIndex(text, p);
-
                     if (text[p] != Constants.ListEndChar)
-                        throw new FormatException("Expected " + Constants.ListEndChar + " at " + IndexToLocationString(text, p));
+                    {
+                        throw new FormatException("Expected " + Constants.ListEndChar + " at " + LineColumnString(text, p) 
+                             + "\n" + ErrorSectionString(text, p));
+                    }
 
                     newList.docIndexEnd = p;
                     newList.SetupAttributes(recordAttHandle, recordAttSource, recordAttAbstract, recordAttNoInherit);
@@ -283,7 +288,8 @@ namespace Tyd
             }
 
             if (p == pStart)
-                throw new FormatException("Missing symbol at " + IndexToLocationString(text, p));
+                throw new FormatException("Missing symbol at " + LineColumnString(text, p)
+                                         +"\n" + ErrorSectionString(text,p));
 
             return text.Substring(pStart, p - pStart);
         }
@@ -299,28 +305,48 @@ namespace Tyd
             return false;
         }
 
-        //Todo fully support \n or \r\n
         private static bool IsNewline(string text, int p)
         {
-            return text[p] == '\n'
-            || (text[p] == '\r' && p < text.Length - 1 && text[p + 1] == '\n');
+            return IsLF(text, p) || IsCRLF(text, p);
         }
 
-        private static string IndexToLocationString(string text, int index)
+        private static bool IsLF(string text, int p)
+        {
+            return text[p] == '\n';
+        }
+
+        private static bool IsCRLF(string text, int p)
+        {
+            return text[p] == '\r' && p < text.Length - 1 && text[p + 1] == '\n';
+        }
+
+        private static string LineColumnString(string text, int index)
         {
             int line, col;
-
             IndexToLineColumn(text, index, out line, out col);
+            return "line " + line + ", col " + col;
+        }
 
-            return "line " + line + " col " + col;
+        private static string ErrorSectionString(string text, int index)
+        {
+            const int CharRangeWidth = 500;
+
+            string modText = text;
+            modText = modText.Insert(index+1, "<---ERROR");
+            if( index > CharRangeWidth || text.Length > index + CharRangeWidth)
+            {
+                int start  = Math.Max(index - CharRangeWidth,0);
+                int length = Math.Min(CharRangeWidth*2, text.Length - index);
+                text = text.Substring(start, length);
+            }
+            return modText;
         }
 
         private static int IndexToLine(string text, int index)
         {
-            int line, _;
-
-            IndexToLineColumn(text, index, out line, out _);
-
+            int line;
+            int unused;
+            IndexToLineColumn(text, index, out line, out unused);
             return line;
         }
 
@@ -328,13 +354,19 @@ namespace Tyd
         {
             line = 1;
             column = 1;
-
             for (int p = 0; p < index; p++)
+
             {
-                if (IsNewline(text, p))
+                if (IsLF(text, p))
                 {
                     line++;
                     column = 0;
+                }
+                else if( IsCRLF(text,p) )
+                {
+                    line++;
+                    column = 0;
+                    p++;    //Skip forward an extra
                 }
                 column++;
             }
