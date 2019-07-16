@@ -1,11 +1,26 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace Tyd
 {
-
     public static class TydFromText
     {
+        private enum SymbolType
+        {
+            RecordName,
+            AttributeName,
+            AttributeValue
+        };
+
+        private enum StringFormat
+        {
+            Naked,
+            Quoted,
+            Vertical
+        }
+
+
         public static IEnumerable<TydNode> Parse(string text)
         {
             return Parse(text, 0, null, true);
@@ -36,7 +51,12 @@ namespace Tyd
 
                     //We reached EOF, so we're finished
                     if (p == text.Length)
+                    {
+                        if( parent != null )
+                            throw new FormatException("Missing closing brackets");
+
                         yield break;
+                    }
 
                     //We reached a closing bracket, so we're finished with this record
                     if (text[p] == Constants.TableEndChar || text[p] == Constants.ListEndChar)
@@ -44,7 +64,7 @@ namespace Tyd
 
                     //Read the record name if we're not reading anonymous records
                     if (expectNames)
-                        recordName = ReadSymbol(text, ref p);
+                        recordName = ReadSymbol(text, SymbolType.RecordName, ref p);
 
                     //Skip whitespace
                     p = NextSubstanceIndex(text, p);
@@ -56,7 +76,7 @@ namespace Tyd
                         p++;
 
                         //Read the att name
-                        string attName = ReadSymbol(text, ref p);
+                        string attName = ReadSymbol(text, SymbolType.AttributeName, ref p);
                         if (attName == Constants.AbstractAttributeName)
                         {
                             //Just reading the abstract name indicates it's abstract, no value is needed
@@ -72,7 +92,7 @@ namespace Tyd
                             p = NextSubstanceIndex(text, p);
 
                             //Read the att value
-                            string attVal = ReadSymbol(text, ref p);
+                            string attVal = ReadSymbol(text, SymbolType.AttributeValue, ref p);
                             switch (attName)
                             {
                                 case Constants.HandleAttributeName: recordAttHandle = attVal; break;
@@ -168,14 +188,20 @@ namespace Tyd
             }
         }
 
-        //We are at the first char of a string value.
+        //We are at the first char of a string value of unknown type.
         //This returns the string value, and places p at the first char after it.
         private static void ParseStringValue(string text, ref int p, out string val)
         {
-            bool quoted = text[p] == '"';
+            StringFormat format;
+            switch( text[p] )
+            {
+                case '"': format = StringFormat.Quoted;   break;
+                case '|': format = StringFormat.Vertical; break;
+                default:  format = StringFormat.Naked;    break;
+            }
 
             //Parse as a quoted string
-            if (quoted)
+            if (format == StringFormat.Quoted)
             {
                 p++; //Move past the opening quote
                 int pStart = p;
@@ -194,7 +220,42 @@ namespace Tyd
                 //Move past the end quote so we're pointing just after it
                 p++;
             }
-            else //Parse as a naked string
+            else if( format == StringFormat.Vertical )
+            {
+                StringBuilder sb = new StringBuilder();
+                while(true) //Line-processing loop
+                {
+                    p++; //Move past vbar at line start
+                    int lineContentStart = p;
+
+                    //Find next end of document or EOL
+                    while( p < text.Length && !IsNewline(text, p) )
+                    {
+                        p++;
+                    }
+                    //p is now pointing at the first EOL char, or just after document end
+
+                    //Add the content of this line to the string
+                    sb.Append( text.Substring( lineContentStart, p-lineContentStart ) );
+
+                    //Skip past EOL and whitespace
+                    p = NextSubstanceIndex(text, p);
+
+                    //If the first substance we hit is a vbar, our string continues.
+                    //Otherwise, it ends
+                    if( p < text.Length && text[p] == '|' )
+                    {
+                        sb.AppendLine();
+                        continue;
+                    }
+                    else
+                    {
+                        val = sb.ToString();
+                        return;
+                    }
+                }
+            }
+            else if( format == StringFormat.Naked )
             {
                 int pStart = p;
 
@@ -223,8 +284,8 @@ namespace Tyd
                 else
                     val = ResolveEscapeChars(val);
             }
-
-            
+            else
+                throw new Exception();
         }
 
         /// <summary>
@@ -272,13 +333,14 @@ namespace Tyd
         //  -Record names
         //  -Attribute names
         //  -Attribute values
-        private static string ReadSymbol(string text, ref int p)
+        private static string ReadSymbol(string text, SymbolType symType, ref int p)
         {
             int pStart = p;
             while (true)
             {
                 var c = text[p];
-                if (char.IsWhiteSpace(text[p]))
+
+                if (char.IsWhiteSpace(c))
                     break;
 
                 if (!IsSymbolChar(c))
@@ -288,10 +350,23 @@ namespace Tyd
             }
 
             if (p == pStart)
-                throw new FormatException("Missing symbol at " + LineColumnString(text, p)
+            {
+                throw new FormatException("Expected " + SymbolTypeName(symType) + " at " + LineColumnString(text, p)
                                          +"\n" + ErrorSectionString(text,p));
+            }
 
             return text.Substring(pStart, p - pStart);
+        }
+
+        private static string SymbolTypeName( SymbolType st )
+        {
+            switch( st )
+            {
+                case SymbolType.RecordName: return "record name";
+                case SymbolType.AttributeName: return "attribute name";
+                case SymbolType.AttributeValue: return "attribute value";
+                default: throw new Exception();
+            }
         }
 
         private static bool IsSymbolChar(char c)
@@ -307,15 +382,15 @@ namespace Tyd
 
         private static bool IsNewline(string text, int p)
         {
-            return IsLF(text, p) || IsCRLF(text, p);
+            return IsNewlineLF(text, p) || IsNewlineCRLF(text, p);
         }
 
-        private static bool IsLF(string text, int p)
+        private static bool IsNewlineLF(string text, int p)
         {
             return text[p] == '\n';
         }
 
-        private static bool IsCRLF(string text, int p)
+        private static bool IsNewlineCRLF(string text, int p)
         {
             return text[p] == '\r' && p < text.Length - 1 && text[p + 1] == '\n';
         }
@@ -332,7 +407,7 @@ namespace Tyd
             const int CharRangeWidth = 500;
 
             string modText = text;
-            modText = modText.Insert(index+1, "<---ERROR");
+            modText = modText.Insert(Math.Min(index, text.Length-1), "[ERROR]");
             if( index > CharRangeWidth || text.Length > index + CharRangeWidth)
             {
                 int start  = Math.Max(index - CharRangeWidth,0);
@@ -352,17 +427,18 @@ namespace Tyd
 
         private static void IndexToLineColumn(string text, int index, out int line, out int column)
         {
+            //Note that these start at 1, not 0, because normal people are supposed to be able to use these
             line = 1;
             column = 1;
             for (int p = 0; p < index; p++)
 
             {
-                if (IsLF(text, p))
+                if (IsNewlineLF(text, p))
                 {
                     line++;
                     column = 0;
                 }
-                else if( IsCRLF(text,p) )
+                else if( IsNewlineCRLF(text,p) )
                 {
                     line++;
                     column = 0;
@@ -378,7 +454,7 @@ namespace Tyd
         ///<summary>
         private static int NextSubstanceIndex(string text, int p)
         {
-            //As long as p keeps hitting comment starts or whitespace, we skip forward
+            //Skip forward as long as p keeps hitting insubstantial chars or char groups
             while (true)
             {
                 //Reached end of text - return an index just after text end
@@ -399,22 +475,24 @@ namespace Tyd
                     continue;
                 }
 
-                //It's the comment char - skip to the next line
+                //It's the start of a comment - skip to the next line
                 if (text[p] == Constants.CommentChar)
                 {
                     while (p < text.Length && !IsNewline(text, p))
                         p++;
 
-                    //Skip past newline char(s). Since there may be just \n or \r\n, we have to handle both cases.
-                    if (text[p] == '\n')
-                        p++;
+                    //Skip past newline char(s)
+                    if ( IsNewlineLF(text, p) )
+                        p += 1;
+                    else if( IsNewlineCRLF(text, p) )
+                        p += 2;
                     else
-                        p += 2;   //If it's not \n, we assume it's \r\n and skip two
+                        throw new Exception();
 
                     continue;
                 }
 
-                //It's not whitespace or the comment char - it's substance
+                //It's not any of the above cases, so it's a substance char
                 return p;
             }
         }
