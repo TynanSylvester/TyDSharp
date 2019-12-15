@@ -481,6 +481,10 @@ namespace Tyd
                     while (p < text.Length && !IsNewline(text, p))
                         p++;
 
+                    //We got to the end of the document (last line was a comment)
+                    if( p == text.Length )
+                        return p;
+
                     //Skip past newline char(s)
                     if ( IsNewlineLF(text, p) )
                         p += 1;
