@@ -1,7 +1,7 @@
 namespace Tyd
 {
 
-internal static class Constants
+public static class Constants
 {
     //Constants - public
     public static string    TydFileExtension        = ".tyd";
